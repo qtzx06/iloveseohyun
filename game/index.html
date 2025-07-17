@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 love clicker - 1 month anniversary game 💖</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-primary: #ff69b4;
+            --pink-secondary: #ff1493;
+            --pink-light: #ffb6c1;
+            --pink-lighter: #ffc0cb;
+            --pink-lightest: #ffcccb;
+            --pink-dark: #c71585;
+            --pink-darker: #8b0000;
+            --white: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.15);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --shadow-pink: rgba(255, 105, 180, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 105, 180, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 20, 147, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 182, 193, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, var(--pink-primary) 0%, var(--pink-secondary) 50%, var(--pink-dark) 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Floating Hearts Background */
+        .hearts-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .floating-heart {
+            position: absolute;
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.6);
+            animation: floatUp 8s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            from {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .game-container {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        /* Game Area */
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Header */
+        .game-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px var(--shadow-pink);
+        }
+
+        .game-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--white), var(--pink-lightest));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        /* Stats Display */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Click Area */
+        .click-area {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 32px var(--shadow-pink);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .click-heart {
+            width: 150px;
+            height: 150px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            user-select: none;
+            filter: drop-shadow(0 10px 20px rgba(255, 105, 180, 0.5));
+            animation: heartbeat 2s ease-in-out infinite;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .click-heart:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0 15px 30px rgba(255, 105, 180, 0.8));
+        }
+
+        .click-heart:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .click-instruction {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Love Progress */
+        .love-progress {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px var(--shadow-pink);
+        }
+
+        .progress-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .progress-bar-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            height: 30px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pink-primary), var(--pink-secondary));
+            border-radius: 25px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: progressShimmer 2s infinite;
+        }
+
+        @keyframes progressShimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        /* Shop Area */
+        .shop-area {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px var(--shadow-pink);
+            height: fit-content;
+        }
+
+        .shop-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .love-maker {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .love-maker:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        .love-maker.affordable {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .love-maker.unaffordable {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .love-maker-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .love-maker-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+        }
+
+        .love-maker-info {
+            flex: 1;
+        }
+
+        .love-maker-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .love-maker-cost {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .love-maker-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .love-maker-count {
+            font-weight: 600;
+            color: var(--pink-lightest);
+        }
+
+        /* Click Effects */
+        .click-effect {
+            position: absolute;
+            pointer-events: none;
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--white);
+            animation: clickFloat 1s ease-out forwards;
+            z-index: 10;
+        }
+
+        @keyframes clickFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+        }
+
+        /* Purchase Effect */
+        .purchase-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--pink-primary);
+            padding: 10px 20px;
+            border-radius: 25px;
+            animation: purchaseNotification 2s ease-out forwards;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        @keyframes purchaseNotification {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 10px 20px;
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .shop-area {
+                order: -1;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .click-heart {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Hearts Background -->
+    <div class="hearts-container" id="heartsContainer"></div>
+
+    <!-- Back Button -->
+    <a href="../index.html" class="back-button">← back to main</a>
+
+    <!-- Main Game Container -->
+    <div class="game-container">
+        <!-- Game Area -->
+        <div class="game-area">
+            <!-- Header -->
+            <div class="game-header">
+                <h1 class="game-title">💖 love clicker 💖</h1>
+                <p class="game-subtitle">1 month anniversary edition :D reach 10,000 love points!</p>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="heartCount">0</div>
+                        <div class="stat-label">💖 hearts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="loveCount">0</div>
+                        <div class="stat-label">💕 love points</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="lovePerSecond">0</div>
+                        <div class="stat-label">love/second</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Click Area -->
+            <div class="click-area" id="clickArea">
+                <img src="/images/quantizix.jpg" alt="💖" class="click-heart" id="clickHeart">
+                <div class="click-instruction">click or tap the heart if you love me <3</div>
+            </div>
+
+            <!-- Love Progress -->
+            <div class="love-progress">
+                <div class="progress-title">💕 love progress to victory 💕</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="progressText">0 / 10,000 love points</div>
+            </div>
+        </div>
+
+        <!-- Shop Area -->
+        <div class="shop-area">
+            <h2 class="shop-title">💝 hinty shop for later >:) 💝</h2>
+            
+            <div class="love-maker" data-maker="heartPainter">
+                <div class="love-maker-header">
+                    <div class="love-maker-icon">🎨</div>
+                    <div class="love-maker-info">
+                        <div class="love-maker-name">heart painter and canvas</div>
+                        <div class="love-maker-cost">cost: 10 💖</div>
+                    </div>
+                </div>
+                <div class="love-maker-stats">
+                    <span>+1 Love/sec</span>
+                    <span class="love-maker-count">Owned: <span id="heartPainterCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="love-maker" data-maker="lovePhotographer">
+                <div class="love-maker-header">
+                    <div class="love-maker-icon">📸</div>
+                    <div class="love-maker-info">
+                        <div class="love-maker-name">"it's like a polaroid love" ahh</div>
+                        <div class="love-maker-cost">cost: 50 💖</div>
+                    </div>
+                </div>
+                <div class="love-maker-stats">
+                    <span>+5 Love/sec</span>
+                    <span class="love-maker-count">Owned: <span id="lovePhotographerCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="love-maker" data-maker="memoryBookCreator">
+                <div class="love-maker-header">
+                    <div class="love-maker-icon">📚</div>
+                    <div class="love-maker-info">
+                        <div class="love-maker-name">journal with many entries</div>
+                        <div class="love-maker-cost">Cost: 200 💖</div>
+                    </div>
+                </div>
+                <div class="love-maker-stats">
+                    <span>+25 Love/sec</span>
+                    <span class="love-maker-count">Owned: <span id="memoryBookCreatorCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="love-maker" data-maker="dreamWeaver">
+                <div class="love-maker-header">
+                    <div class="love-maker-icon">🌙</div>
+                    <div class="love-maker-info">
+                        <div class="love-maker-name">i miss our damn sleep calls! >:(</div>
+                        <div class="love-maker-cost">Cost: 1,000 💖</div>
+                    </div>
+                </div>
+                <div class="love-maker-stats">
+                    <span>+100 Love/sec</span>
+                    <span class="love-maker-count">Owned: <span id="dreamWeaverCount">0</span></span>
+                </div>
+            </div>
+
+            <div class="love-maker" data-maker="eternalLoveGuardian">
+                <div class="love-maker-header">
+                    <div class="love-maker-icon">👼</div>
+                    <div class="love-maker-info">
+                        <div class="love-maker-name">eternal love guardian</div>
+                        <div class="love-maker-cost">Cost: 5,000 💖</div>
+                    </div>
+                </div>
+                <div class="love-maker-stats">
+                    <span>+500 Love/sec</span>
+                    <span class="love-maker-count">Owned: <span id="eternalLoveGuardianCount">0</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            hearts: 0,
+            love: 0,
+            heartPainter: 0,
+            lovePhotographer: 0,
+            memoryBookCreator: 0,
+            dreamWeaver: 0,
+            eternalLoveGuardian: 0,
+            totalClicks: 0,
+            victoryShown: false
+        };
+
+        // Love Maker Configurations
+        const loveMakers = {
+            heartPainter: { cost: 10, lovePerSecond: 1, costMultiplier: 1.15 },
+            lovePhotographer: { cost: 50, lovePerSecond: 5, costMultiplier: 1.15 },
+            memoryBookCreator: { cost: 200, lovePerSecond: 25, costMultiplier: 1.15 },
+            dreamWeaver: { cost: 1000, lovePerSecond: 100, costMultiplier: 1.15 },
+            eternalLoveGuardian: { cost: 5000, lovePerSecond: 500, costMultiplier: 1.15 }
+        };
+
+        // DOM Elements
+        const clickHeart = document.getElementById('clickHeart');
+        const clickArea = document.getElementById('clickArea');
+        const heartCountElement = document.getElementById('heartCount');
+        const loveCountElement = document.getElementById('loveCount');
+        const lovePerSecondElement = document.getElementById('lovePerSecond');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const heartsContainer = document.getElementById('heartsContainer');
+
+        // Load game state from localStorage
+        function loadGame() {
+            const saved = localStorage.getItem('loveClickerSave');
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGame() {
+            localStorage.setItem('loveClickerSave', JSON.stringify(gameState));
+        }
+
+        // Update display
+        function updateDisplay() {
+            heartCountElement.textContent = Math.floor(gameState.hearts).toLocaleString();
+            loveCountElement.textContent = Math.floor(gameState.love).toLocaleString();
+            
+            // Calculate love per second
+            let lovePerSec = 0;
+            Object.keys(loveMakers).forEach(maker => {
+                lovePerSec += gameState[maker] * loveMakers[maker].lovePerSecond;
+            });
+            lovePerSecondElement.textContent = lovePerSec.toLocaleString();
+
+            // Update progress bar
+            const progress = Math.min((gameState.love / 10000) * 100, 100);
+            progressBar.style.width = progress + '%';
+            progressText.textContent = `${Math.floor(gameState.love).toLocaleString()} / 10,000 Love Points`;
+
+            // Update love maker counts and affordability
+            Object.keys(loveMakers).forEach(maker => {
+                const countElement = document.getElementById(maker + 'Count');
+                const makerElement = document.querySelector(`[data-maker="${maker}"]`);
+                
+                if (countElement) {
+                    countElement.textContent = gameState[maker];
+                }
+                
+                if (makerElement) {
+                    const cost = getCurrentCost(maker);
+                    makerElement.querySelector('.love-maker-cost').textContent = `Cost: ${cost.toLocaleString()} 💖`;
+                    
+                    if (gameState.hearts >= cost) {
+                        makerElement.classList.add('affordable');
+                        makerElement.classList.remove('unaffordable');
+                    } else {
+                        makerElement.classList.remove('affordable');
+                        makerElement.classList.add('unaffordable');
+                    }
+                }
+            });
+
+            // Check for victory
+            if (gameState.love >= 10000 && !gameState.victoryShown) {
+                showVictory();
+            }
+        }
+
+        // Get current cost of a love maker
+        function getCurrentCost(maker) {
+            const baseCost = loveMakers[maker].cost;
+            const multiplier = loveMakers[maker].costMultiplier;
+            return Math.floor(baseCost * Math.pow(multiplier, gameState[maker]));
+        }
+
+        // Heart click handler
+        function handleHeartClick(event) {
+            gameState.hearts += 1;
+            gameState.totalClicks += 1;
+            
+            // Create click effect
+            createClickEffect(event.pageX, event.pageY, '+1 💖');
+            
+            // Heart animation
+            clickHeart.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                clickHeart.style.transform = 'scale(1)';
+            }, 150);
+            
+            updateDisplay();
+            saveGame();
+        }
+
+        // Create click effect
+        function createClickEffect(x, y, text) {
+            const effect = document.createElement('div');
+            effect.className = 'click-effect';
+            effect.textContent = text;
+            effect.style.left = x + 'px';
+            effect.style.top = y + 'px';
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 1000);
+        }
+
+        // Purchase love maker
+        function purchaseLoveMaker(maker) {
+            const cost = getCurrentCost(maker);
+            
+            if (gameState.hearts >= cost) {
+                gameState.hearts -= cost;
+                gameState[maker] += 1;
+                
+                // Create purchase effect
+                createPurchaseEffect(`Purchased ${maker.replace(/([A-Z])/g, ' $1').trim()}!`);
+                
+                updateDisplay();
+                saveGame();
+            }
+        }
+
+        // Create purchase effect
+        function createPurchaseEffect(text) {
+            const effect = document.createElement('div');
+            effect.className = 'purchase-effect';
+            effect.textContent = text;
+            document.body.appendChild(effect);
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 2000);
+        }
+
+        // Auto-generate love
+        function autoGenerateLove() {
+            let totalLovePerSecond = 0;
+            
+            Object.keys(loveMakers).forEach(maker => {
+                totalLovePerSecond += gameState[maker] * loveMakers[maker].lovePerSecond;
+            });
+            
+            if (totalLovePerSecond > 0) {
+                gameState.love += totalLovePerSecond / 10; // Update 10 times per second
+                updateDisplay();
+                
+                // Save every 5 seconds
+                if (Math.floor(Date.now() / 1000) % 5 === 0) {
+                    saveGame();
+                }
+            }
+        }
+
+        // Create floating hearts
+        function createFloatingHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'floating-heart';
+            heart.textContent = ['💖', '💕', '💗', '💘'][Math.floor(Math.random() * 4)];
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.fontSize = (15 + Math.random() * 10) + 'px';
+            heart.style.animationDuration = (6 + Math.random() * 4) + 's';
+            
+            heartsContainer.appendChild(heart);
+            
+            setTimeout(() => {
+                if (heartsContainer.contains(heart)) {
+                    heartsContainer.removeChild(heart);
+                }
+            }, 8000);
+        }
+
+        // Show victory screen
+        function showVictory() {
+            gameState.victoryShown = true;
+            saveGame();
+            
+            const victoryMessage = document.createElement('div');
+            victoryMessage.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, var(--pink-primary), var(--pink-secondary));
+                color: white;
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                font-size: 24px;
+                font-weight: 600;
+                z-index: 10000;
+                box-shadow: 0 20px 40px rgba(255, 105, 180, 0.6);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                backdrop-filter: blur(20px);
+            `;
+            victoryMessage.innerHTML = `
+                <h2 style="margin-bottom: 20px;">🎉 CONGRATULATIONS! 🎉</h2>
+                <p>you've reached 10,000 love points!</p>
+                <p style="margin-top: 10px;">happy 1 month anniversary! 💖</p>
+                <button onclick="this.parentElement.remove()" style="
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background: rgba(255, 255, 255, 0.2);
+                    border: 1px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 25px;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">continue playing</button>
+            `;
+            document.body.appendChild(victoryMessage);
+        }
+
+        // Event Listeners
+        clickHeart.addEventListener('click', handleHeartClick);
+
+        // Love maker click handlers
+        document.querySelectorAll('.love-maker').forEach(maker => {
+            maker.addEventListener('click', () => {
+                const makerType = maker.getAttribute('data-maker');
+                if (!maker.classList.contains('unaffordable')) {
+                    purchaseLoveMaker(makerType);
+                }
+            });
+        });
+
+        // Initialize game
+        loadGame();
+        updateDisplay();
+
+        // Start auto-generation and floating hearts
+        setInterval(autoGenerateLove, 100); // Update 10 times per second
+        setInterval(createFloatingHeart, 3000); // Create heart every 3 seconds
+
+        // Auto-save every 30 seconds
+        setInterval(saveGame, 30000);
+    </script>
+</body>
+</html>

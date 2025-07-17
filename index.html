@@ -1,1 +1,1343 @@
-<h1>it works 😎</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEOHYUN</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --primary-black: #000000;
+            --dark-green: #1a2919;
+            --darker-green: #091704;
+            --sage-green: #9caf88;
+            --matcha-green: #7d8471;
+            --matcha-green-but-lighter: #9ca58c;
+            --matcha-green-but-darker: #223320;
+            --glow-green: #000000;
+            --deep-green: #000000;
+            --background-light: #fafafa;
+            --background-dark: #f5f5f5;
+            --white: #f5f5f5;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background:
+                radial-gradient(circle at 20% 80%, rgba(10, 40, 24, 0.6) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(45, 74, 43, 0.4) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(157, 175, 136, 0.15) 0%, transparent 50%),
+                linear-gradient(135deg, var(--glow-green) 0%, var(--deep-green) 50%, var(--primary-black) 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Three.js Canvas */
+        #three-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Main Screen */
+        .main-screen {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Text Animation Phases */
+        .text-phase {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            opacity: 0;
+            transition: all 1s ease;
+        }
+
+        .text-phase.active {
+            opacity: 1;
+        }
+
+        .text-phase.move-up {
+            transform: translate(-50%, -80%);
+        }
+
+        .wait-text {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 300;
+            color: white;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 20px rgba(157, 175, 136, 0.5);
+        }
+
+        .question-text {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            color: white;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 15px rgba(157, 175, 136, 0.4);
+        }
+
+        .compliments-container {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 300;
+            line-height: 1.8;
+            color: white;
+            margin-bottom: 3rem;
+        }
+
+        .compliment-word {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease;
+            margin: 0 0.5rem;
+        }
+
+        .compliment-word.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .first-letter {
+            color: var(--white);
+            font-weight: 600;
+            font-size: 1.2em;
+            text-shadow: 0 0 10px rgba(45, 74, 43, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        .first-letter.highlight {
+            color: var(--sage-green);
+            text-shadow: 0 0 20px rgba(157, 175, 136, 0.8);
+            transform: scale(1.3);
+        }
+
+        .seohyun-formation {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 600;
+            color: var(--dark-green);
+            letter-spacing: 0.1em;
+            opacity: 0;
+            text-shadow: 0 0 30px rgba(45, 74, 43, 0.5);
+            display: none; /* Hide CSS text - using Three.js 3D text instead */
+        }
+
+        .seohyun-formation.active {
+            opacity: 1;
+            animation: seohyunGlow 2s ease-in-out infinite alternate;
+        }
+
+        .choice-container {
+            opacity: 0;
+            transform: translateY(50%);
+            animation: fadeInUp 1s ease forwards;
+            animation-delay: 15s;
+            margin-top: 32rem; /* Moved down much more */
+        }
+
+        .choice-btn {
+            display: inline-block;
+            margin: 1rem;
+            padding: 1.2rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--darker-green), var(--matcha-green-but-darker));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-decoration: none;
+            box-shadow: 0 10px 40px rgba(157, 175, 136, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            opacity: 90%;
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .choice-btn:hover::before {
+            left: 100%;
+        }
+
+        .choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 60px rgba(157, 175, 136, 0.5);
+            background: linear-gradient(135deg, var(--sage-green), #a8c99a);
+        }
+
+        .choice-btn:active {
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        .choice-btn.no-btn {
+            background: linear-gradient(135deg, var(--matcha-green-but-darker), var(--darker-green));
+            box-shadow: 0 10px 40px rgba(125, 132, 113, 0.3);
+        }
+
+        .choice-btn.no-btn:hover {
+            background: linear-gradient(135deg, var(--darker-green), var(--matcha-green));
+            box-shadow: 0 20px 60px rgba(125, 132, 113, 0.5);
+        }
+
+        /* Glassmorphism Components */
+        .glass-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            opacity: 90%;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 450px;
+            width: 100%;
+            display: none;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(157, 175, 136, 0.2);
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--dark-green);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--primary-black);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid rgba(157, 175, 136, 0.3);
+            border-radius: 10px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            color: var(--primary-black);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--sage-green);
+            box-shadow: 0 0 0 3px rgba(157, 175, 136, 0.2);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, var(--sage-green), var(--dark-green));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(157, 175, 136, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(157, 175, 136, 0.4);
+        }
+
+        .back-btn {
+            margin-top: 1rem;
+            background: linear-gradient(135deg, var(--matcha-green), var(--dark-green));
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            opacity: 90%;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(125, 132, 113, 0.3);
+        }
+
+        .error-message {
+            color: #dc2626;
+            margin-top: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* Admin Dashboard */
+        .admin-dashboard {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(157, 175, 136, 0.2);
+            max-width: 600px;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--dark-green);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .admin-btn {
+            display: block;
+            width: 100%;
+            margin: 1rem 0;
+            padding: 1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            background: linear-gradient(135deg, var(--dark-green), var(--matcha-green));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(157, 175, 136, 0.3);
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(157, 175, 136, 0.4);
+        }
+
+        /* Seohyun Page */
+        .seohyun-page {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(157, 175, 136, 0.2);
+            max-width: 700px;
+            text-align: center;
+        }
+
+        .seohyun-page-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--dark-green);
+            margin-bottom: 2rem;
+        }
+
+        .seohyun-message {
+            font-size: 1.3rem;
+            color: var(--primary-black);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .seohyun-message .highlight {
+            color: var(--sage-green);
+            font-weight: 500;
+        }
+
+        /* Anniversary Game Section */
+        .anniversary-game-section {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .anniversary-game-btn {
+            display: inline-block;
+            padding: 1.5rem 3rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #ff69b4, #ff1493, #ff69b4);
+            background-size: 200% 200%;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            text-decoration: none;
+            box-shadow: 0 15px 35px rgba(255, 105, 180, 0.4);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: pinkGlow 3s ease-in-out infinite alternate;
+        }
+
+        .anniversary-game-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .anniversary-game-btn:hover::before {
+            left: 100%;
+        }
+
+        .anniversary-game-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(255, 105, 180, 0.6);
+            background-position: 100% 0;
+        }
+
+        .anniversary-game-btn:active {
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .game-description {
+            font-size: 1rem;
+            color: var(--primary-black);
+            margin-top: 1rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        @keyframes pinkGlow {
+            0% {
+                box-shadow: 0 15px 35px rgba(255, 105, 180, 0.4);
+                filter: brightness(1);
+            }
+            100% {
+                box-shadow: 0 20px 40px rgba(255, 105, 180, 0.7);
+                filter: brightness(1.1);
+            }
+        }
+
+        /* Collage View */
+        .collage-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .collage-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--matcha-green-but-lighter);
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(157, 175, 136, 0.8);
+        }
+
+        .collage-subtitle {
+            font-size: 1.2rem;
+            color: var(--matcha-green);
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .photo-item {
+            aspect-ratio: 1;
+            border-radius: 15px;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 90%;
+            box-shadow: 0 4px 20px rgba(157, 175, 136, 0.2);
+        }
+
+        .photo-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(157, 175, 136, 0.3);
+            opacity: 100%;
+        }
+
+        .photo-placeholder {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, var(--dark-green), var(--matcha-green));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 90%;
+        }
+
+        .photo-placeholder:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 32px rgba(157, 175, 136, 0.3);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes seohyunGlow {
+            0% { text-shadow: 0 0 30px rgba(45, 74, 43, 0.5); }
+            100% { text-shadow: 0 0 50px rgba(157, 175, 136, 0.8); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .choice-btn {
+                display: block;
+                margin: 0.5rem 0;
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .glass-container {
+                padding: 1.5rem;
+            }
+            
+            .photo-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="three-canvas"></canvas>
+    
+    <div class="container">
+        <!-- Main Screen -->
+        <div id="mainScreen" class="main-screen">
+            <!-- Phase 1: WAIT -->
+            <div id="phase1" class="text-phase active">
+                <div class="wait-text">WAIT!</div>
+            </div>
+            
+            <!-- Phase 2: are you... -->
+            <div id="phase2" class="text-phase">
+                <div class="question-text">are you...</div>
+            </div>
+            
+            <!-- Phase 3: Compliments -->
+            <div id="phase3" class="text-phase">
+                <div class="compliments-container">
+                    <div class="compliment-word" data-word="Supremely"><span class="first-letter">S</span>upremely</div>
+                    <div class="compliment-word" data-word="Enchanting"><span class="first-letter">E</span>nchanting,</div><br>
+                    <div class="compliment-word" data-word="Otherworldly"><span class="first-letter">O</span>therworldly,</div>
+                    <div class="compliment-word" data-word="Heavenly"><span class="first-letter">H</span>eavenly,</div><br>
+                    <div class="compliment-word" data-word="Yearning"><span class="first-letter">Y</span>outhful,</div>
+                    <div class="compliment-word" data-word="Unfading"><span class="first-letter">U</span>nfading,</div>
+                    <div class="compliment-word" data-word="and"></span>and</div>
+                    <div class="compliment-word" data-word="Nurturing"><span class="first-letter">N</span>urturing?</div>
+                </div>
+            </div>
+            
+            <!-- SEOHYUN Formation -->
+            <div id="seohyunFormation" class="seohyun-formation">SEOHYUN?</div>
+            
+            <div class="choice-container">
+                <button class="choice-btn no-btn" onclick="showLogin()">yes! enter your credentials (sent earlier :D)</button>
+                <button class="choice-btn no-btn" onclick="showCollage()">no... but i'd love to enjoy a collage of you two! :)</button>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginScreen" class="glass-container login-container">
+            <h2 class="login-title">prove it! 😤😡🥀🧑‍🎤</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">username: </label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">password: (hint: this is true) </label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">login!</button>
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+            <button class="back-btn" onclick="showMain()">back</button>
+        </div>
+
+        <!-- Admin Dashboard -->
+        <div id="adminScreen" class="glass-container admin-dashboard">
+            <h2 class="admin-title">admin dashboard</h2>
+            <button class="admin-btn" onclick="showSeohyunPage()">go to Seohyun's Page</button>
+            <button class="admin-btn" onclick="showCollage()">go to Collage View</button>
+            <button class="back-btn" onclick="showMain()">back to Main</button>
+        </div>
+
+        <!-- Seohyun's Page -->
+        <div id="seohyunScreen" class="glass-container seohyun-page">
+            <h2 class="seohyun-page-title">welcome, my shayla! 😍🩷🐶🧟‍♂️</h2>
+            <div class="seohyun-message">
+                it's our 1 month anniversary today! i love you so so so much :) please click on this button to play a game i made:
+            </div>
+            <div class="anniversary-game-section">
+                <button class="anniversary-game-btn" onclick="window.open('./game/index.html', '_blank')">
+                    💖 play our love clicker game! 💖
+                </button>
+                <p class="game-description">
+                    spam click the heart and unlock love makers to reach 10,000 love points! 🎮💕
+                </p>
+            </div>
+            <button class="back-btn" onclick="showMain()">back to main</button>
+        </div>
+    </div>
+
+    <!-- Collage View -->
+    <div id="collageScreen" class="collage-container">
+        <h2 class="collage-title">our tuff ahh photo collage 🐢🐛🔥🦔</h2>
+        <p class="collage-subtitle">i miss my shayla :(</p>
+        <div class="photo-grid">
+            <img src="images/1.jpg" alt="Photo 1" class="photo-item">
+            <img src="images/2.jpg" alt="Photo 2" class="photo-item">
+            <img src="images/3.jpg" alt="Photo 3" class="photo-item">
+            <img src="images/4.jpg" alt="Photo 4" class="photo-item">
+            <img src="images/5.jpg" alt="Photo 5" class="photo-item">
+            <img src="images/6.jpg" alt="Photo 6" class="photo-item">
+            <img src="images/7.jpg" alt="Photo 7" class="photo-item">
+            <img src="images/8.jpg" alt="Photo 8" class="photo-item">
+            <img src="images/9.jpg" alt="Photo 9" class="photo-item">
+        </div>
+        <button class="back-btn" onclick="showMain()">back to main</button>
+    </div>
+
+    <script>
+        // Enhanced Three.js with more particles and effects
+        let scene, camera, renderer, particles, particleSystem2, particleSystem3;
+        let wireframeSphere, seohyunText3D;
+        let mouse = new THREE.Vector2();
+        let time = 0;
+        let fontLoader, font;
+
+        function initThreeJS() {
+            try {
+                // Scene setup
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                renderer = new THREE.WebGLRenderer({
+                    canvas: document.getElementById('three-canvas'),
+                    alpha: true,
+                    antialias: true
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                camera.position.z = 5;
+
+                // Create multiple particle systems
+                createMainParticles();
+                createFloatingParticles();
+                createSparkleParticles();
+                
+                // Create wireframe sphere
+                createWireframeSphere();
+
+                // Enhanced lighting for 3D text
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0x9caf88, 1.2);
+                directionalLight.position.set(1, 1, 1);
+                scene.add(directionalLight);
+                
+                // Additional point lights for dramatic effect
+                const pointLight1 = new THREE.PointLight(0x9caf88, 0.8, 100);
+                pointLight1.position.set(5, 5, 5);
+                scene.add(pointLight1);
+                
+                const pointLight2 = new THREE.PointLight(0x7d8471, 0.6, 100);
+                pointLight2.position.set(-5, -5, 5);
+                scene.add(pointLight2);
+
+                // Load font and create 3D text
+                loadFontAndCreateText();
+
+                // Mouse interaction
+                document.addEventListener('mousemove', onMouseMove);
+                window.addEventListener('resize', onWindowResize);
+
+                // Start animation
+                animate();
+
+                console.log('✅ Enhanced Three.js initialized successfully');
+            } catch (error) {
+                console.error('❌ Three.js initialization failed:', error);
+            }
+        }
+
+        function createMainParticles() {
+            const particleCount = 1500;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            const sizes = new Float32Array(particleCount);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 30;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+
+                // Green color variations
+                colors[i * 3] = 0.2 + Math.random() * 0.3;
+                colors[i * 3 + 1] = 0.4 + Math.random() * 0.5;
+                colors[i * 3 + 2] = 0.2 + Math.random() * 0.3;
+
+                sizes[i] = Math.random() * 0.08 + 0.02;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.05,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function createFloatingParticles() {
+            const particleCount = 800;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 50;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 50;
+
+                // Sage green variations
+                colors[i * 3] = 0.6 + Math.random() * 0.2;
+                colors[i * 3 + 1] = 0.7 + Math.random() * 0.2;
+                colors[i * 3 + 2] = 0.5 + Math.random() * 0.2;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.03,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem2 = new THREE.Points(geometry, material);
+            scene.add(particleSystem2);
+        }
+
+        function createSparkleParticles() {
+            const particleCount = 400;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * 40;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 40;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 40;
+
+                // Bright sparkle colors
+                colors[i * 3] = 0.8 + Math.random() * 0.2;
+                colors[i * 3 + 1] = 0.9 + Math.random() * 0.1;
+                colors[i * 3 + 2] = 0.7 + Math.random() * 0.3;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.4,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem3 = new THREE.Points(geometry, material);
+            scene.add(particleSystem3);
+        }
+
+        function createWireframeSphere() {
+            // Create intricate wireframe sphere
+            const sphereGeometry = new THREE.IcosahedronGeometry(8, 2); // Radius 8, detail level 2
+            const sphereMaterial = new THREE.LineBasicMaterial({
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.15,
+                linewidth: 1
+            });
+            
+            // Create wireframe from geometry
+            const wireframeGeometry = new THREE.WireframeGeometry(sphereGeometry);
+            wireframeSphere = new THREE.LineSegments(wireframeGeometry, sphereMaterial);
+            
+            // Position sphere in background
+            wireframeSphere.position.set(0, 0, -10);
+            scene.add(wireframeSphere);
+            
+            console.log('✅ Wireframe sphere created');
+        }
+
+        function loadFontAndCreateText() {
+            // Load a proper font and create 3D text
+            const loader = new THREE.FontLoader();
+            
+            // Try to load a font from Google Fonts CDN
+            loader.load(
+                'https://threejs.org/examples/fonts/helvetiker_regular.typeface.json',
+                function (font) {
+                    create3DText(font);
+                },
+                undefined,
+                function (error) {
+                    console.log('Font loading failed, using fallback');
+                    // If font loading fails, create simple 3D text
+                    createFallback3DText();
+                }
+            );
+        }
+
+        function create3DText(font) {
+            try {
+                seohyunText3D = new THREE.Group();
+                
+                // Create 3D text geometry using the loaded font
+                const textGeometry = new THREE.TextGeometry('SEOHYUN !', {
+                    font: font,
+                    size: 0.85,
+                    height: 0.15,
+                    curveSegments: 12,
+                    bevelEnabled: true,
+                    bevelThickness: 0.02,
+                    bevelSize: 0.01,
+                    bevelOffset: 0,
+                    bevelSegments: 5
+                });
+                
+                // Center the text
+                textGeometry.computeBoundingBox();
+                const textWidth = textGeometry.boundingBox.max.x - textGeometry.boundingBox.min.x;
+                const textHeight = textGeometry.boundingBox.max.y - textGeometry.boundingBox.min.y;
+                
+                textGeometry.translate(-textWidth / 2, -textHeight / 2, 0);
+                
+                // Beautiful transparent material
+                const textMaterial = new THREE.MeshPhysicalMaterial({
+                    color: 0xffffff,
+                    metalness: 0.1,
+                    roughness: 0.05,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.05,
+                    transparent: true,
+                    opacity: 0.6,
+                    envMapIntensity: 2.0,
+                    side: THREE.DoubleSide
+                });
+                
+                const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+                seohyunText3D.add(textMesh);
+                
+                // Add subtle geometric accents
+                for (let i = 0; i < 6; i++) {
+                    const accentGeometry = new THREE.OctahedronGeometry(0.02);
+                    const accentMaterial = new THREE.MeshPhysicalMaterial({
+                        color: 0x9caf88,
+                        metalness: 0.8,
+                        roughness: 0.1,
+                        emissive: 0x4d6a4b,
+                        emissiveIntensity: 0.3,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    
+                    const accent = new THREE.Mesh(accentGeometry, accentMaterial);
+                    accent.position.x = (Math.random() - 0.5) * textWidth * 1.2;
+                    accent.position.y = (Math.random() - 0.5) * textHeight * 1.5;
+                    accent.position.z = 0.2 + Math.random() * 0.1;
+                    seohyunText3D.add(accent);
+                }
+                
+                // Position and scale the text group
+                seohyunText3D.position.set(0, 0, 2);
+                seohyunText3D.scale.set(0.4, 0.4, 0.4);
+                seohyunText3D.visible = false; // Start hidden
+                
+                scene.add(seohyunText3D);
+                
+                console.log('✅ 3D SEOHYUN text created with real font');
+            } catch (error) {
+                console.error('❌ 3D text creation failed:', error);
+                createFallback3DText();
+            }
+        }
+
+        function createFallback3DText() {
+            try {
+                // Simple fallback if font loading fails
+                seohyunText3D = new THREE.Group();
+                
+                // Create simple but clean 3D blocks for each letter
+                const letters = ['S', 'E', 'O', 'H', 'Y', 'U', 'N'];
+                const letterSpacing = 0.5;
+                const startX = -(letters.length - 1) * letterSpacing / 2;
+                
+                letters.forEach((letter, index) => {
+                    // Create a clean rounded box for each letter
+                    const letterGeometry = new THREE.RoundedBoxGeometry(0.35, 0.6, 0.1, 4, 0.02);
+                    
+                    const letterMaterial = new THREE.MeshPhysicalMaterial({
+                        color: 0xffffff,
+                        metalness: 0.1,
+                        roughness: 0.05,
+                        clearcoat: 1.0,
+                        clearcoatRoughness: 0.05,
+                        transparent: true,
+                        opacity: 0.5,
+                        envMapIntensity: 2.0,
+                        side: THREE.DoubleSide
+                    });
+                    
+                    const letterMesh = new THREE.Mesh(letterGeometry, letterMaterial);
+                    letterMesh.position.x = startX + index * letterSpacing;
+                    letterMesh.position.y = 0;
+                    letterMesh.position.z = 0;
+                    
+                    seohyunText3D.add(letterMesh);
+                });
+                
+                // Position the text group
+                seohyunText3D.position.set(0, 0, 2);
+                seohyunText3D.scale.set(0.4, 0.4, 0.4);
+                seohyunText3D.visible = false;
+                
+                scene.add(seohyunText3D);
+                
+                console.log('✅ Fallback 3D SEOHYUN text created');
+            } catch (error) {
+                console.error('❌ Fallback text creation failed:', error);
+            }
+        }
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.01;
+
+            // Animate main particles
+            if (particles) {
+                particles.rotation.x += 0.0005;
+                particles.rotation.y += 0.001;
+                particles.position.x = Math.sin(time * 0.5) * 0.5 + mouse.x * 0.3;
+                particles.position.y = Math.cos(time * 0.3) * 0.3 + mouse.y * 0.3;
+
+                const positions = particles.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 1] += Math.sin(time + i * 0.01) * 0.002;
+                    positions[i] += Math.cos(time + i * 0.01) * 0.001;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Animate floating particles
+            if (particleSystem2) {
+                particleSystem2.rotation.x += 0.0008;
+                particleSystem2.rotation.y += 0.0012;
+                particleSystem2.position.x = Math.cos(time * 0.3) * 0.8 + mouse.x * 0.2;
+                particleSystem2.position.y = Math.sin(time * 0.4) * 0.6 + mouse.y * 0.2;
+            }
+
+            // Animate sparkle particles
+            if (particleSystem3) {
+                particleSystem3.rotation.x += 0.0015;
+                particleSystem3.rotation.y += 0.0008;
+                particleSystem3.position.x = Math.sin(time * 0.8) * 0.4 + mouse.x * 0.5;
+                particleSystem3.position.y = Math.cos(time * 0.6) * 0.4 + mouse.y * 0.5;
+
+                // Sparkle effect
+                const positions = particleSystem3.geometry.attributes.position.array;
+                for (let i = 0; i < positions.length; i += 3) {
+                    positions[i + 2] += Math.sin(time * 2 + i * 0.1) * 0.01;
+                }
+                particleSystem3.geometry.attributes.position.needsUpdate = true;
+            }
+
+            // Animate wireframe sphere
+            if (wireframeSphere) {
+                wireframeSphere.rotation.x += 0.003;
+                wireframeSphere.rotation.y += 0.002;
+                wireframeSphere.rotation.z += 0.001;
+                
+                // Subtle scale pulsing
+                const scaleVariation = 1 + Math.sin(time * 0.5) * 0.05;
+                wireframeSphere.scale.set(scaleVariation, scaleVariation, scaleVariation);
+                
+                // Mouse influence on rotation speed
+                wireframeSphere.rotation.y += mouse.x * 0.001;
+                wireframeSphere.rotation.x += mouse.y * 0.001;
+            }
+
+            // Animate 3D text
+            if (seohyunText3D && seohyunText3D.visible) {
+                // Gentle floating animation
+                seohyunText3D.position.y = Math.sin(time * 0.8) * 0.2;
+                seohyunText3D.rotation.y = Math.sin(time * 0.3) * 0.1;
+                
+                // Animate individual letters
+                seohyunText3D.children.forEach((child, index) => {
+                    if (child.type === 'Mesh') {
+                        child.rotation.z = Math.sin(time * 0.5 + index * 0.3) * 0.05;
+                        child.position.y = Math.sin(time * 0.7 + index * 0.5) * 0.1;
+                    }
+                });
+
+                // Interactive tilt based on mouse movement
+                seohyunText3D.rotation.x = mouse.y * 0.1;
+                seohyunText3D.rotation.y += mouse.x * 0.05;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Enhanced text animation sequence
+        function startTextAnimation() {
+            const phase1 = document.getElementById('phase1');
+            const phase2 = document.getElementById('phase2');
+            const phase3 = document.getElementById('phase3');
+            const seohyunFormation = document.getElementById('seohyunFormation');
+
+            // Phase 1: WAIT (shows immediately)
+            
+            // Phase 2: are you... (after 2 seconds)
+            setTimeout(() => {
+                phase1.classList.remove('active');
+                phase2.classList.add('active');
+            }, 2000);
+
+            // Phase 3: Compliments appear one by one (after 4 seconds)
+            setTimeout(() => {
+                phase2.classList.remove('active');
+                phase2.classList.add('move-up');
+                phase3.classList.add('active');
+                phase3.classList.add('move-up');
+                
+                // Show compliment words one by one
+                showComplimentsOneByOne();
+            }, 4000);
+        }
+
+        function showComplimentsOneByOne() {
+            const complimentWords = document.querySelectorAll('.compliment-word');
+            const firstLetters = document.querySelectorAll('.first-letter');
+            
+            complimentWords.forEach((word, index) => {
+                setTimeout(() => {
+                    word.classList.add('show');
+                }, index * 800); // 800ms between each word
+            });
+
+            // After all words are shown, highlight first letters
+            setTimeout(() => {
+                firstLetters.forEach((letter, index) => {
+                    setTimeout(() => {
+                        letter.classList.add('highlight');
+                    }, index * 200);
+                });
+                
+                // Form SEOHYUN after highlighting
+                setTimeout(() => {
+                    formSeohyun();
+                }, 2000);
+            }, complimentWords.length * 800 + 800);
+        }
+
+        function formSeohyun() {
+            const phase3 = document.getElementById('phase3');
+            
+            // Hide compliments and show 3D SEOHYUN formation
+            phase3.style.transition = 'opacity 1s ease';
+            phase3.style.opacity = '0';
+            
+            setTimeout(() => {
+                // Show 3D text with gravity planet formation animation
+                if (seohyunText3D) {
+                    seohyunText3D.visible = true;
+                    seohyunText3D.scale.set(0.7, 0.7, 0.7); // Final scale
+                    
+                    // Store original positions and scatter pieces like space debris
+                    const originalPositions = [];
+                    seohyunText3D.children.forEach((child, index) => {
+                        // Store original position
+                        originalPositions[index] = {
+                            x: child.position.x,
+                            y: child.position.y,
+                            z: child.position.z
+                        };
+                        
+                        // Scatter to random positions (like explosion debris in space)
+                        const angle = Math.random() * Math.PI * 2;
+                        const distance = 8 + Math.random() * 12; // Random distance from center
+                        child.position.x = originalPositions[index].x + Math.cos(angle) * distance;
+                        child.position.y = originalPositions[index].y + Math.sin(angle) * distance;
+                        child.position.z = originalPositions[index].z + (Math.random() - 0.5) * 6;
+                        
+                        // Start with very low opacity
+                        if (child.material) {
+                            child.material.opacity = 0.1;
+                        }
+                    });
+                    
+                    // Animate pieces coming together with gravity effect
+                    const animateGravityFormation = () => {
+                        let allInPlace = true;
+                        
+                        seohyunText3D.children.forEach((child, index) => {
+                            const target = originalPositions[index];
+                            const current = child.position;
+                            
+                            // Calculate distance to target
+                            const dx = target.x - current.x;
+                            const dy = target.y - current.y;
+                            const dz = target.z - current.z;
+                            const distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+                            
+                            if (distance > 0.05) {
+                                allInPlace = false;
+                                
+                                // Move towards target with gravity-like acceleration
+                                const speed = 0.08 + (1 / (distance + 1)) * 0.12; // Faster as it gets closer
+                                current.x += dx * speed;
+                                current.y += dy * speed;
+                                current.z += dz * speed;
+                                
+                                // Gradually increase opacity as it approaches
+                                if (child.material && child.material.opacity < 0.6) {
+                                    child.material.opacity += 0.02;
+                                }
+                            } else {
+                                // Snap to final position
+                                current.x = target.x;
+                                current.y = target.y;
+                                current.z = target.z;
+                                if (child.material) {
+                                    child.material.opacity = 0.6;
+                                }
+                            }
+                        });
+                        
+                        if (!allInPlace) {
+                            requestAnimationFrame(animateGravityFormation);
+                        } else {
+                            console.log('✅ SEOHYUN gravity formation complete!');
+                        }
+                    };
+                    
+                    // Start the gravity animation after a brief delay
+                    setTimeout(animateGravityFormation, 200);
+                }
+            }, 1000);
+        }
+
+        // Authentication credentials
+        const credentials = {
+            'admin': 'admin123',
+            'seohxunni': 'iloveseohyun!'
+        };
+
+        // Screen navigation functions
+        function showMain() {
+            document.getElementById('mainScreen').style.display = 'block';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'none';
+            document.getElementById('seohyunScreen').style.display = 'none';
+            document.getElementById('collageScreen').style.display = 'none';
+            document.querySelector('.container').style.display = 'flex';
+            
+            // Reset animation states and show choice buttons
+            const choiceContainer = document.querySelector('.choice-container');
+            if (choiceContainer) {
+                choiceContainer.style.opacity = '0.9';
+                choiceContainer.style.transform = 'translateY(0)';
+            }
+            
+            // Show 3D text if it exists
+            if (seohyunText3D) {
+                seohyunText3D.visible = true;
+            }
+            
+            // Ensure all text phases are in their final state
+            const phase1 = document.getElementById('phase1');
+            const phase2 = document.getElementById('phase2');
+            const phase3 = document.getElementById('phase3');
+            
+            if (phase1) phase1.style.opacity = '0';
+            if (phase2) phase2.style.opacity = '0';
+            if (phase3) phase3.style.opacity = '0';
+        }
+
+        function showLogin() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('errorMessage').textContent = '';
+        }
+
+        function showCollage() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'none';
+            document.getElementById('seohyunScreen').style.display = 'none';
+            document.getElementById('collageScreen').style.display = 'block';
+            document.querySelector('.container').style.display = 'none';
+        }
+
+        function showAdmin() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'block';
+            document.getElementById('seohyunScreen').style.display = 'none';
+            document.getElementById('collageScreen').style.display = 'none';
+        }
+
+        function showSeohyunPage() {
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminScreen').style.display = 'none';
+            document.getElementById('seohyunScreen').style.display = 'block';
+            document.getElementById('collageScreen').style.display = 'none';
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.textContent = '';
+            
+            if (credentials[username] && credentials[username] === password) {
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                
+                if (username === 'admin') {
+                    showAdmin();
+                } else if (username === 'seohxunni') {
+                    showSeohyunPage();
+                }
+            } else {
+                errorMessage.textContent = 'invalid username or password. please try again.';
+            }
+        });
+
+        // Photo placeholder click handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const photoPlaceholders = document.querySelectorAll('.photo-placeholder');
+            photoPlaceholders.forEach(placeholder => {
+                placeholder.addEventListener('click', function() {
+                    alert('click here to add your image!\n\nto add images:\n1. create an "images" folder\n2. add your photos\n3. update the HTML to use your image paths');
+                });
+            });
+        });
+
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            initThreeJS();
+            startTextAnimation();
+        });
+    </script>
+</body>
+</html>
